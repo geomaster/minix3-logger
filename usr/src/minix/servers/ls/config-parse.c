@@ -52,6 +52,7 @@ parser_state_t* parse_init() {
 
 	state->kind = PARSE_LOGGER_KEYWORD;
 	state->line_no = 1;
+	state->char_no = 1;
 	state->consume_offset = 0;
 	state->curr_value_offset = 0;
 
@@ -92,7 +93,7 @@ int parse_consumption(parser_state_t* state, const char* literal, char ch, parse
 		return 0;
 	} else {
 		char chbuf[16];
-		LS_LOG_PRINTF(info, "Unexpected character '%s' while consuming literal '%s'", translate_char(ch, chbuf), literal);
+		LS_LOG_PRINTF(warn, "Unexpected character '%s' while consuming literal '%s'", translate_char(ch, chbuf), literal);
 		return -1;
 	}
 }
@@ -107,7 +108,7 @@ int is_white(char ch) {
 		if (ret < 0) { \
 			set_parse_error(&res, state); \
 		} else { \
-			res.kind = PARSE_OK; \
+			set_parse_ok(&res); \
 		} \
 		\
 		return res; \
@@ -143,12 +144,18 @@ int is_whitespace_invariant(parser_state_t* state) {
 
 int is_newline_invariant(parser_state_t* state) {
 	// We are waiting for the opening brace after the logger name.
-	if (state->kind == PARSE_OPEN_BRACE && state->consume_offset) {
+	if (state->kind == PARSE_OPEN_BRACE && state->consume_offset == 0) {
 		return TRUE;
 	}
 
 	// We are waiting for the first char of the logger keyword.
-	if (state->kind == PARSE_LOGGER_KEYWORD && state->consume_offset > 0) {
+	if (state->kind == PARSE_LOGGER_KEYWORD && state->consume_offset == 0) {
+		return TRUE;
+	}
+
+	// We are waiting for an option name. This just means an empty line, which we
+	// allow.
+	if (state->kind == PARSE_CONFIG_OPTION_NAME && state->curr_value_offset == 0) {
 		return TRUE;
 	}
 
@@ -197,12 +204,6 @@ parser_result_t parse_advance(parser_state_t* state, char ch, char lookahead) {
 	switch (state->kind) {
 		/* States which consume fixed strings. */
 		case PARSE_LOGGER_KEYWORD:
-			// Skip newlines if we still haven't seen the start of the logger keyword.
-			if (state->consume_offset == 0) {
-				set_parse_ok(&res);
-				return res;
-			}
-
 			TRY_PARSE(parse_consumption(state, "logger", ch, PARSE_LOGGER_NAME));
 			break;
 
@@ -252,7 +253,7 @@ parser_result_t parse_advance(parser_state_t* state, char ch, char lookahead) {
 				res.kind = PARSE_GOT_LOGGER;
 				state->kind = PARSE_LOGGER_KEYWORD;
 				state->consume_offset = 0;
-			} else if (is_white(ch) || ch == '\n') {
+			} else if (is_white(ch) && state->curr_value_offset > 0) {
 				state->kind = PARSE_CONFIG_OPTION_EQUALS;
 				state->curr_value[state->curr_value_offset] = '\0';
 
@@ -308,7 +309,7 @@ ls_logger_list_t* parse_config_file(const char* filename)
 	LS_LOG_PRINTF(info, "Parsing config file '%s'", filename);
 
 	if (fd < 0) {
-		LS_LOG_PRINTF(warn, "Failed opening file '%s'", filename);
+		LS_LOG_PRINTF(warn, "Failed opening file '%s': %d", filename, fd);
 		goto failure;
 	}
 	LS_LOG_PRINTF(debug, "Successfully opened '%s'", filename);
