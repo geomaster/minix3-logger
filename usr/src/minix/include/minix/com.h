@@ -28,6 +28,7 @@
  *   0x1400 - 0x14FF	Real Time Clock requests and responses
  *   0x1500 - 0x15FF	Input server messages
  *   0x1600 - 0x16FF	VirtualBox (VBOX) requests (see vboxif.h)
+ *   0x1700 - 0x17FF    Logging server requests
  *
  * Zero and negative values are widely used for OK and error responses.
  */
@@ -62,7 +63,8 @@
 #define MFS_PROC_NR  ((endpoint_t) 7)   /* minix root filesystem */
 #define VM_PROC_NR   ((endpoint_t) 8)   /* memory server */
 #define PFS_PROC_NR  ((endpoint_t) 9)  /* pipe filesystem */
-#define LAST_SPECIAL_PROC_NR	10	/* An untyped version for
+#define LS_PROC_NR   ((endpoint_t) 10)  /* logging server by David Davidovic */
+#define LAST_SPECIAL_PROC_NR	11	/* An untyped version for
                                            computation in macros.*/
 #define INIT_PROC_NR ((endpoint_t) LAST_SPECIAL_PROC_NR)  /* init
                                                         -- goes multiuser */
@@ -962,6 +964,13 @@
 #define RTCDEV_NOFLAGS	0x00	/* no flags are set */
 #define RTCDEV_Y2KBUG	0x01	/* Interpret 1980 as 2000 for RTC w/Y2K bug */
 #define RTCDEV_CMOSREG	0x02	/* Also set the CMOS clock register bits. */
+
+/*===========================================================================*
+ *			Messages for Logging Server  			     *
+ *===========================================================================*/
+#define LS_BASE         0x1700
+#define LS_INITIALIZE   (LS_BASE + 0)
+#define LS_END          (LS_BASE + 1)
 
 /*===========================================================================*
  *		Internal codes used by several services			     *
