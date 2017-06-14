@@ -984,8 +984,9 @@
 #define LS_ERR_LOGGER_OPEN       (LS_ERR_BASE - 3)
 #define LS_ERR_PERMISSION_DENIED (LS_ERR_BASE - 4)
 #define LS_ERR_LOGGER_NOT_OPEN   (LS_ERR_BASE - 5)
-#define LS_ERR_INTERNAL          (LS_ERR_BASE - 6)
-#define LS_ERR_END               (LS_ERR_BASE - 7)
+#define LS_ERR_INIT_FAILED       (LS_ERR_BASE - 6)
+#define LS_ERR_EXTERNAL          (LS_ERR_BASE - 7)
+#define LS_ERR_END               (LS_ERR_BASE - 8)
 
 /*===========================================================================*
  *		Internal codes used by several services			     *

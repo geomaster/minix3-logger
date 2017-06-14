@@ -66,7 +66,6 @@ typedef struct ls_logger_state_t {
 	int fd;
 	char opened_by_name[LS_MAX_PROC_NAME_LEN];
 	char msg_buf[LS_MAX_MESSAGE_LEN];
-	int msg_len;
 } ls_logger_state_t;
 
 typedef struct ls_logger_list_t {
@@ -84,6 +83,9 @@ extern int g_is_initialized;
 int main(int argc, char **argv);
 void reply(endpoint_t destination, message* msg);
 
+ls_logger_list_t* find_logger(const char* logger);
+int ensure_initialized();
+
 /* requests.c */
 int do_initialize();
 int do_start_log(const char* logger, endpoint_t who);
@@ -92,5 +94,7 @@ int do_write_log(const char* logger, ls_severity_level_t severity, char* msg, in
 int do_clear_log(const char* logger);
 int do_set_severity(const char* logger, ls_severity_level_t severity);
 int do_clear_logs();
-ls_logger_t* find_logger(const char* logger);
-void ensure_initialized();
+
+/* log.h */
+const char* severity_to_str(ls_severity_level_t severity);
+int print_log(const char* format, const char* message, int msg_len, ls_severity_level_t severity, const char* procname, char* buffer, int buffer_len);

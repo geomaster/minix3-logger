@@ -1,6 +1,6 @@
 # Makefile for Logging Server by David Davidovic (LS)
 PROG=	ls
-SRCS=	main.c requests.c config-parse.c bufio.c mini-printf.c
+SRCS=	main.c requests.c config-parse.c bufio.c mini-printf.c log.c
 
 DPADD+=	${LIBSYS}
 LDADD+=	-lsys

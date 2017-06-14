@@ -1,5 +1,6 @@
 #include "inc.h"
 #include <minix/endpoint.h>
+#include "mini-printf.h"
 
 /* SEF functions and variables. */
 void sef_local_startup(void);
@@ -7,24 +8,15 @@ void sef_local_startup(void);
 int wait_request(message* msg, ls_request_t* req);
 
 ls_logger_list_t* g_loggers;
+int g_is_initialized;
 
-/*===========================================================================*
- *				main                                         *
- *===========================================================================*/
 int main(int argc, char **argv)
 {
-	/* This is the main routine of this service. The main loop consists of 
-	 * three major activities: getting new work, processing the work, and
-	 * sending the reply. The loop never terminates, unless a panic occurs.
-	 */
-
-	uint16_t severity;
-	/* SEF local startup. */
 	env_setargs(argc, argv);
 	sef_local_startup();
 
-	/* Main loop - get work and do it, forever. */
 	while (TRUE) {
+		uint16_t severity;
 		ls_request_t req;
 		message m;
 		int result;
@@ -92,27 +84,22 @@ int main(int argc, char **argv)
 	return OK;
 }
 
-/*===========================================================================*
- *			       sef_local_startup			     *
- *===========================================================================*/
 void sef_local_startup()
 {
 	sef_startup();
 }
 
-/*===========================================================================*
- *				get_work                                     *
- *===========================================================================*/
 int wait_request(message *msg, ls_request_t *req)
 {
-	int status = sef_receive(ANY, msg);   /* blocks until message arrives */
+	int status = sef_receive(ANY, msg);
 	if (OK != status) {
-		panic("LS: failed to receive message!: %d", status);
+		LS_LOG_PRINTF(warn, "Failed to receive message from pid %d: %d", msg->m_source, status);
+		return status;
 	}
 
 	req->source = msg->m_source;
 	if (msg->m_type < LS_BASE || msg->m_type >= LS_END) {
-		printf("LS: invalid message type %d", msg->m_type);
+		LS_LOG_PRINTF(warn, "Invalid message type %d from pid %d", msg->m_type, msg->m_source);
 		return -1;
 	}
 
@@ -120,11 +107,39 @@ int wait_request(message *msg, ls_request_t *req)
 	return OK;
 }
 
-/*===========================================================================*
- *				reply					     *
- *===========================================================================*/
+int ensure_initialized() {
+	if (g_is_initialized) {
+		return OK;
+	}
+
+	int ret = do_initialize();
+	if (ret != OK) {
+		LS_LOG_PRINTF(warn, "Initialization failed: %d", ret);
+		return LS_ERR_INIT_FAILED;
+	}
+
+	g_is_initialized = TRUE;
+
+	return OK;
+}
+
 void reply(endpoint_t destination, message *msg) {
 	int s = ipc_send(destination, msg);
-	if (OK != s)
-		printf("LS: unable to send reply to %d: %d\n", destination, s);
+	if (OK != s) {
+		LS_LOG_PRINTF(warn, "Unable to send reply to %d: %d", destination, s);
+	}
+}
+
+ls_logger_list_t* find_logger(const char* logger) {
+	if (!g_loggers) {
+		return NULL;
+	}
+
+	for (ls_logger_list_t* l = g_loggers; l; l = l->tail) {
+		if (strcmp(l->logger.name, logger) == 0) {
+			return l;
+		}
+	}
+
+	return NULL;
 }
