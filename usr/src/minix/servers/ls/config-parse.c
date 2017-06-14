@@ -471,7 +471,7 @@ ls_logger_list_t* parse_config_file(const char* filename)
 	bufio_t* bufio = bufio_init(fd);
 	if (!bufio) {
 		LS_LOG_PUTS(warn, "Failed to allocate bufio");
-		goto failure;
+		goto close_fd;
 	}
 	LS_LOG_PUTS(debug, "Successfully allocated bufio");
 
@@ -525,6 +525,11 @@ ls_logger_list_t* parse_config_file(const char* filename)
 		c = bufio_next_char(bufio);
 	}
 
+	if (c == BUFIO_ERR) {
+		LS_LOG_PUTS(warn, "Error reading config file");
+		goto dealloc_loggers;
+	}
+
 	LS_LOG_PRINTF(info, "Successfully parsed config file and registered %d loggers", nloggers);
 
 	return head;
@@ -541,6 +546,9 @@ dealloc_loggers:
 
 dealloc_bufio:
 	bufio_free(bufio);
+
+close_fd:
+	close(fd);
 
 failure:
 	return NULL;
