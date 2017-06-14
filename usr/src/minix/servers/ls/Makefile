@@ -1,9 +1,11 @@
 # Makefile for Logging Server by David Davidovic (LS)
 PROG=	ls
-SRCS=	main.c requests.c config-parse.c bufio.c
+SRCS=	main.c requests.c config-parse.c bufio.c mini-printf.c
 
 DPADD+=	${LIBSYS}
 LDADD+=	-lsys
+
+CFLAGS+=-D_SYSTEM
 
 BOOT_FILE = /boot/minix_latest/mod11_ls.gz
 

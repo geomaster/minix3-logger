@@ -1,11 +1,34 @@
 #pragma once
 
+#include <stdio.h>
+#include <minix/log.h>
 #include <minix/ipc.h>
 #include <minix/com.h>
+#include <stdlib.h>
 
 #define LS_MAX_LOGGER_NAME_LEN              32
 #define LS_MAX_LOGGER_LOGFILE_PATH_LEN      64
 #define LS_MAX_LOGGER_FORMAT_LEN			128
+
+#define LS_ERR_BUF_LEN						1024
+
+#define LS_LOG_PRINTF(level, fmt, ...) \
+	do { \
+		char _ls_logbuf[4096]; \
+		mini_snprintf(_ls_logbuf, 4096, fmt "\n", __VA_ARGS__); \
+		log_##level(&ls_syslog, _ls_logbuf); \
+	} while (0)
+
+#define LS_LOG_PUTS(level, str) \
+	do { \
+		log_##level(&ls_syslog, str "\n"); \
+	} while (0)
+
+static struct log ls_syslog = {
+	.name = "ls",
+	.log_level = LEVEL_TRACE,
+	.log_func = default_log
+};
 
 /* Data structures. */
 typedef struct ls_request_t {
