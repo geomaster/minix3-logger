@@ -5,6 +5,7 @@
 .depend
 .gdbinit
 usr/src/minix/servers/ls/staging/
+usr/src/minix/servers/ls/ls
 usr/src/minix/drivers/audio/es1370/es1370
 usr/src/minix/drivers/audio/es1371/es1371
 usr/src/minix/drivers/audio/sb16/sb16
