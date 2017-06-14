@@ -304,8 +304,9 @@ parser_result_t parse_advance(parser_state_t* state, char ch, char lookahead) {
 		/* Just so we can show a reasonable error message. */
 		state->line_no++;
 		state->char_no = 0;
+	} else {
+		state->char_no++;
 	}
-	state->char_no++;
 
 	parser_result_t res;
 	if ((is_white(ch) && is_whitespace_invariant(state)) ||
