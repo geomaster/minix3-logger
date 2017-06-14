@@ -7,6 +7,7 @@
 #include "bufio.h"
 #include "mini-printf.h"
 #include <assert.h>
+#include <sys/errno.h>
 
 #define MAX_VALUE_LEN            2048
 
@@ -424,8 +425,17 @@ parser_result_t parse_advance(parser_state_t* state, char ch, char lookahead) {
 	}
 }
 
-int is_logger_valid(parser_state_t* state) {
+int is_logger_valid(parser_state_t* state, ls_logger_list_t* head) {
 	ls_logger_t* l = &state->current_logger;
+
+	if (head) {
+		for (ls_logger_list_t* pl = head; pl; pl = pl->tail) {
+			if (strcmp(l->name, pl->logger.name) == 0) {
+				LS_LOG_PRINTF(warn, "Logger '%s' is already defined", l->name);
+				return FALSE;
+			}
+		}
+	}
 
 	if (!state->did_set_format) {
 		LS_LOG_PRINTF(warn, "Logger '%s' has no format option, but it is required", l->name);
@@ -455,21 +465,24 @@ int is_logger_valid(parser_state_t* state) {
 	return TRUE;
 }
 
-ls_logger_list_t* parse_config_file(const char* filename)
+int parse_config_file(const char* filename, ls_logger_list_t** dest)
 {
 	ls_logger_list_t *l, *nxt;
+	int ret = OK;
 
 	int fd = open(filename, O_RDONLY);
 	LS_LOG_PRINTF(info, "Parsing config file '%s'", filename);
 
 	if (fd < 0) {
 		LS_LOG_PRINTF(warn, "Failed opening file '%s': %d", filename, fd);
+		ret = fd;
 		goto failure;
 	}
 	LS_LOG_PRINTF(debug, "Successfully opened '%s'", filename);
 
 	bufio_t* bufio = bufio_init(fd);
 	if (!bufio) {
+		ret = ENOMEM;
 		LS_LOG_PUTS(warn, "Failed to allocate bufio");
 		goto close_fd;
 	}
@@ -477,6 +490,7 @@ ls_logger_list_t* parse_config_file(const char* filename)
 
 	parser_state_t* state = parse_init();
 	if (!state) {
+		ret = ENOMEM;
 		LS_LOG_PUTS(warn, "Failed to init parser state");
 		goto dealloc_bufio;
 	}
@@ -492,22 +506,26 @@ ls_logger_list_t* parse_config_file(const char* filename)
 		switch (res.kind) {
 			case PARSE_ERROR:
 				LS_LOG_PRINTF(warn, "Parse error on line %d char %d.\n", res.error_line_no, res.error_char_no);
+				ret = EINVAL;
 				goto dealloc_bufio;
 				break;
 
 			case PARSE_GOT_LOGGER:
 				LS_LOG_PUTS(debug, "Got a logger");
-				if (!is_logger_valid(state)) {
+				if (!is_logger_valid(state, head)) {
+					ret = EINVAL;
 					goto dealloc_loggers;
 				}
 
 				ls_logger_list_t* new = malloc(sizeof(ls_logger_list_t));
 				if (!new) {
+					ret = ENOMEM;
 					LS_LOG_PUTS(warn, "Failed to allocate memory");
 					goto dealloc_loggers;
 				}
 
 				new->logger = state->current_logger;
+				memset(&new->state, 0, sizeof(ls_logger_state_t));
 				if (!head) {
 					head = new;
 				}
@@ -527,16 +545,14 @@ ls_logger_list_t* parse_config_file(const char* filename)
 
 	if (c == BUFIO_ERR) {
 		LS_LOG_PUTS(warn, "Error reading config file");
+		ret = EIO;
 		goto dealloc_loggers;
 	}
 
 	LS_LOG_PRINTF(info, "Successfully parsed config file and registered %d loggers", nloggers);
 
-	return head;
-
-	close(fd);
-	bufio_free(bufio);
-	return NULL;
+	*dest = head;
+	goto dealloc_bufio;
 
 dealloc_loggers:
 	for (l = head; l; l = nxt) {
@@ -551,5 +567,5 @@ close_fd:
 	close(fd);
 
 failure:
-	return NULL;
+	return ret;
 }

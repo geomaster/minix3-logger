@@ -9,8 +9,9 @@
 #define LS_MAX_LOGGER_NAME_LEN              32
 #define LS_MAX_LOGGER_LOGFILE_PATH_LEN      64
 #define LS_MAX_LOGGER_FORMAT_LEN			128
-
+#define LS_MAX_PROC_NAME_LEN				2048
 #define LS_ERR_BUF_LEN						1024
+#define LS_MAX_MESSAGE_LEN					2048
 
 #define LS_LOG_PRINTF(level, fmt, ...) \
 	do { \
@@ -58,16 +59,38 @@ typedef struct ls_logger_t {
 	int append;
 } ls_logger_t;
 
+typedef struct ls_logger_state_t {
+	int is_open;
+	ls_severity_level_t severity;
+	endpoint_t opened_by;
+	int fd;
+	char opened_by_name[LS_MAX_PROC_NAME_LEN];
+	char msg_buf[LS_MAX_MESSAGE_LEN];
+	int msg_len;
+} ls_logger_state_t;
+
 typedef struct ls_logger_list_t {
 	ls_logger_t logger;
+	ls_logger_state_t state;
 	struct ls_logger_list_t* tail;
 } ls_logger_list_t;
 
 /* Function prototypes. */
 
 /* main.c */
+extern ls_logger_list_t* g_loggers;
+extern int g_is_initialized;
+
 int main(int argc, char **argv);
 void reply(endpoint_t destination, message* msg);
 
 /* requests.c */
-int do_initialize(message *msg, const ls_request_t* req);
+int do_initialize();
+int do_start_log(const char* logger, endpoint_t who);
+int do_close_log(const char* logger, endpoint_t who);
+int do_write_log(const char* logger, ls_severity_level_t severity, char* msg, int msg_len, endpoint_t who);
+int do_clear_log(const char* logger);
+int do_set_severity(const char* logger, ls_severity_level_t severity);
+int do_clear_logs();
+ls_logger_t* find_logger(const char* logger);
+void ensure_initialized();

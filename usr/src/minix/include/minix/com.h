@@ -970,7 +970,22 @@
  *===========================================================================*/
 #define LS_BASE         0x1700
 #define LS_INITIALIZE   (LS_BASE + 0)
-#define LS_END          (LS_BASE + 1)
+#define LS_START_LOG    (LS_BASE + 1)
+#define LS_SET_SEVERITY (LS_BASE + 2)
+#define LS_WRITE_LOG    (LS_BASE + 4)
+#define LS_CLOSE_LOG    (LS_BASE + 5)
+#define LS_CLEAR_LOG    (LS_BASE + 6)
+#define LS_CLEAR_ALL    (LS_BASE + 7)
+#define LS_END          (LS_BASE + 8)
+
+#define LS_ERR_BASE              -5888
+#define LS_ERR_ALREADY_OPEN      (LS_ERR_BASE - 1)
+#define LS_ERR_NO_SUCH_LOGGER    (LS_ERR_BASE - 2)
+#define LS_ERR_LOGGER_OPEN       (LS_ERR_BASE - 3)
+#define LS_ERR_PERMISSION_DENIED (LS_ERR_BASE - 4)
+#define LS_ERR_LOGGER_NOT_OPEN   (LS_ERR_BASE - 5)
+#define LS_ERR_INTERNAL          (LS_ERR_BASE - 6)
+#define LS_ERR_END               (LS_ERR_BASE - 7)
 
 /*===========================================================================*
  *		Internal codes used by several services			     *

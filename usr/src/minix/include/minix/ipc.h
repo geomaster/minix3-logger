@@ -2023,6 +2023,39 @@ typedef struct {
 } mess_vmmcp_reply;
 _ASSERT_MSG_SIZE(mess_vmmcp_reply);
 
+/* Logging server messages. */
+
+typedef struct {
+	char logger[48];
+	char padding[8];
+} mess_ls_logger;
+_ASSERT_MSG_SIZE(mess_ls_logger);
+
+typedef struct {
+	char logger[48];
+	uint16_t severity;
+	char padding[6];
+} mess_ls_set_severity;
+_ASSERT_MSG_SIZE(mess_ls_set_severity);
+
+typedef struct {
+	char logger[48];
+	uint16_t severity;
+	uint16_t message_len;
+	void* message;
+} mess_ls_write_log;
+_ASSERT_MSG_SIZE(mess_ls_write_log);
+
+typedef struct {
+	char logger[52];
+	cp_grant_id_t grant;
+} mess_ls_get_message_grant;
+_ASSERT_MSG_SIZE(mess_ls_get_message_grant);
+
+typedef mess_ls_logger mess_ls_start_log;
+typedef mess_ls_logger mess_ls_close_log;
+typedef mess_ls_logger mess_ls_clear_log;
+
 typedef struct {
 	endpoint_t m_source;		/* who sent the message */
 	int m_type;			/* what kind of message is it */
@@ -2251,6 +2284,13 @@ typedef struct {
 		mess_vm_vfs_mmap	m_vm_vfs_mmap;
 		mess_vmmcp		m_vmmcp;
 		mess_vmmcp_reply	m_vmmcp_reply;
+
+		mess_ls_start_log m_ls_start_log;
+		mess_ls_set_severity m_ls_set_severity;
+		mess_ls_write_log m_ls_write_log;
+		mess_ls_close_log m_ls_close_log;
+		mess_ls_clear_log m_ls_clear_log;
+		mess_ls_get_message_grant m_ls_get_message_grant;
 
 		u8_t size[56];	/* message payload may have 56 bytes at most */
 	};
