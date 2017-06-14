@@ -1,0 +1,7 @@
+*.o
+*.a
+*.so
+*.d
+.depend
+.gdbinit
+usr/src/minix/servers/ls/staging/
