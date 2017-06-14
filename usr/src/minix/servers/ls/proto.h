@@ -37,21 +37,22 @@ typedef struct ls_request_t {
 } ls_request_t;
 
 typedef enum ls_log_destination_t {
-	LS_LOG_DESTINATION_FILE,
-	LS_LOG_DESTINATION_STDERR,
-	LS_LOG_DESTINATION_STDOUT
+	LS_DESTINATION_FILE,
+	LS_DESTINATION_STDERR,
+	LS_DESTINATION_STDOUT
 } ls_log_destination_t;
 
 typedef enum ls_severity_level_t {
-	LS_SEV_LEVEL_TRACE,
-	LS_SEV_LEVEL_DEBUG,
-	LS_SEV_LEVEL_ERROR
+	LS_SEV_TRACE,
+	LS_SEV_DEBUG,
+	LS_SEV_INFO,
+	LS_SEV_WARN
 } ls_severity_level_t;
 
 typedef struct ls_logger_t {
 	char name[LS_MAX_LOGGER_NAME_LEN];
 	ls_log_destination_t dest_type;
-	ls_severity_level_t default_severity;
+	ls_severity_level_t severity;
 	char dest_filename[LS_MAX_LOGGER_LOGFILE_PATH_LEN];
 	char format[LS_MAX_LOGGER_FORMAT_LEN];
 	int append;
