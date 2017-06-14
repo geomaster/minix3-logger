@@ -5,7 +5,7 @@ SRCS=	main.c requests.c config-parse.c bufio.c mini-printf.c
 DPADD+=	${LIBSYS}
 LDADD+=	-lsys
 
-CFLAGS+=-D_SYSTEM
+CFLAGS+=-D_SYSTEM -Wall
 
 BOOT_FILE = /boot/minix_latest/mod11_ls.gz
 
