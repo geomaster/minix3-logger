@@ -242,7 +242,7 @@ int do_clear_log(const char* logger) {
 	TRY_FIND_LOGGER(logger, l);
 
 	if (l->state.is_open) {
-		LS_LOG_PRINTF(warn, "Cannot clear all logs, as the log for '%s' is open", l->logger.name);
+		LS_LOG_PRINTF(warn, "Cannot clear log for '%s' as it is open", l->logger.name);
 		return LS_ERR_LOGGER_OPEN;
 	} else {
 		if (l->logger.dest_type == LS_DESTINATION_FILE) {

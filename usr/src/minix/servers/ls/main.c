@@ -10,6 +10,19 @@ int wait_request(message* msg, ls_request_t* req);
 ls_logger_list_t* g_loggers;
 int g_is_initialized;
 
+int valid_severity(int sev) {
+	switch (sev) {
+		case LS_SEV_TRACE:
+		case LS_SEV_DEBUG:
+		case LS_SEV_WARN:
+		case LS_SEV_INFO:
+			return TRUE;
+
+		default:
+			return FALSE;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	env_setargs(argc, argv);
@@ -37,7 +50,7 @@ int main(int argc, char **argv)
 				break;
 
 			case LS_WRITE_LOG:
-				if (m.m_ls_write_log.message_len > LS_MAX_MESSAGE_LEN) {
+				if (m.m_ls_write_log.message_len > LS_MAX_MESSAGE_LEN || !valid_severity(m.m_ls_write_log.severity)) {
 					result = EINVAL;
 				} else {
 					result = do_write_log(m.m_ls_write_log.logger, m.m_ls_write_log.severity, m.m_ls_write_log.message, m.m_ls_write_log.message_len, m.m_source);
@@ -51,17 +64,10 @@ int main(int argc, char **argv)
 
 			case LS_SET_SEVERITY:
 				severity = m.m_ls_set_severity.severity;
-				switch (severity) {
-					case LS_SEV_TRACE:
-					case LS_SEV_DEBUG:
-					case LS_SEV_WARN:
-					case LS_SEV_INFO:
-						result = do_set_severity(m.m_ls_set_severity.logger, (ls_severity_level_t)m.m_ls_set_severity.severity);
-						break;
-
-					default:
-						result = EINVAL;
-						break;
+				if (valid_severity(severity)) {
+					result = do_set_severity(m.m_ls_set_severity.logger, (ls_severity_level_t)m.m_ls_set_severity.severity);
+				} else {
+					result = EINVAL;
 				}
 
 				break;
