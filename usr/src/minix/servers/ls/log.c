@@ -79,7 +79,7 @@ char* put_time(char* pb, char* pend) {
 	}
 
 	char buffer[1024];
-	mini_snprintf(buffer, 1023, "%04d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1980, tm.tm_mon + 1, tm.tm_mday + 1, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	mini_snprintf(buffer, 1023, "%04d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday + 1, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	buffer[1023] = '\0';
 
 	PUTS(buffer, pb);
