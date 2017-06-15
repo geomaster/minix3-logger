@@ -75,7 +75,6 @@ int do_initialize() {
 }
 
 int do_start_log(const char* logger, endpoint_t who) {
-	LS_LOG_PUTS(info, "muda");
 	LS_LOG_PRINTF(info, "Starting logger '%s' by pid %d", logger, who);
 
 	ls_logger_list_t* l;
@@ -100,8 +99,6 @@ int do_start_log(const char* logger, endpoint_t who) {
 			LS_LOG_PRINTF(warn, "Failed to open file '%s' for writing to logger '%s'", l->logger.dest_filename, logger);
 			return LS_ERR_EXTERNAL;
 		}
-
-		LS_LOG_PRINTF(debug, "fd=%d", fd);
 
 		l->state.fd = fd;
 	}
