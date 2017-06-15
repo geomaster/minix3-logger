@@ -979,14 +979,13 @@
 #define LS_END          (LS_BASE + 8)
 
 #define LS_ERR_BASE              -5888
-#define LS_ERR_ALREADY_OPEN      (LS_ERR_BASE - 1)
-#define LS_ERR_NO_SUCH_LOGGER    (LS_ERR_BASE - 2)
-#define LS_ERR_LOGGER_OPEN       (LS_ERR_BASE - 3)
-#define LS_ERR_PERMISSION_DENIED (LS_ERR_BASE - 4)
-#define LS_ERR_LOGGER_NOT_OPEN   (LS_ERR_BASE - 5)
-#define LS_ERR_INIT_FAILED       (LS_ERR_BASE - 6)
-#define LS_ERR_EXTERNAL          (LS_ERR_BASE - 7)
-#define LS_ERR_END               (LS_ERR_BASE - 8)
+#define LS_ERR_NO_SUCH_LOGGER    (LS_ERR_BASE - 1)
+#define LS_ERR_LOGGER_OPEN       (LS_ERR_BASE - 2)
+#define LS_ERR_PERMISSION_DENIED (LS_ERR_BASE - 3)
+#define LS_ERR_LOGGER_NOT_OPEN   (LS_ERR_BASE - 4)
+#define LS_ERR_INIT_FAILED       (LS_ERR_BASE - 5)
+#define LS_ERR_EXTERNAL          (LS_ERR_BASE - 6)
+#define LS_ERR_END               (LS_ERR_BASE - 7)
 
 /*===========================================================================*
  *		Internal codes used by several services			     *
