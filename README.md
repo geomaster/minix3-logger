@@ -44,9 +44,10 @@ log messages are appended to it.
 Loggers are first open by processes, and then written to. Only one process can
 have a logger open at a time.
 
-### The configuration file
+### Configuration file
 
-In the config file, you define different loggers like this:
+The configuration file should live at `/etc/logs.conf`. In the config file, you
+define different loggers like this:
 
 ```
 logger YourLoggerName {
